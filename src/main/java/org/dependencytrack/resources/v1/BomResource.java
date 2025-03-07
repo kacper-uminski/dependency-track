@@ -75,6 +75,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -241,6 +242,86 @@ public class BomResource extends AlpineResource {
             }
         }
     }
+
+    @DELETE
+    @Path("/project/{uuid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Deletes the BOM for a specific project",
+            description = "<p>Requires permission <strong>BOM_DELETE</strong></p>"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "BOM successfully deleted"
+            ),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Access to the specified project is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The project or BOM could not be found")
+    })
+    //@PermissionRequired(Permissions.Constants.VIEW_PORTFOLIO)
+    public Response deleteBom(
+            @Parameter(description = "The UUID of the project to delete BOM for", required = true)
+            @PathParam("uuid") @ValidUuid String uuid) {
+
+        try (QueryManager qm = new QueryManager()) {
+            // Fetch the project using UUID
+            Project project = qm.getObjectByUuid(Project.class, uuid);
+            if (project == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Project not found").build();
+            }
+
+            // Call the deleteBoms method to delete BOMs associated with the project
+            qm.deleteBoms(project);
+            //qm.delete(qm.getAllBoms(project));
+
+            // Return success response
+            return Response.ok().entity("BOM deleted successfully").build();
+        } catch (Exception e) {
+            LOGGER.error("Error deleting BOM", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error deleting BOM").build();
+        }
+    }
+
+    @GET
+    @Path("/project/{uuid}/bom")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Retrieves all BOMs for a specific project",
+            description = "<p>Requires permission <strong>BOM_VIEW</strong></p>"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved BOMs"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Access to the specified project is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The project or BOM could not be found")
+    })
+    //@PermissionRequired(Permissions.Constants.VIEW_PORTFOLIO)
+    public Response getAllBoms(
+            @Parameter(description = "The UUID of the project to retrieve BOMs for", required = true)
+            @PathParam("uuid") @ValidUuid String uuid) {
+
+        try (QueryManager qm = new QueryManager()) {
+            // Fetch the project using UUID
+            Project project = qm.getObjectByUuid(Project.class, uuid);
+            if (project == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Project not found").build();
+            }
+
+            // Retrieve all BOMs for the project
+            List<Bom> boms = qm.getAllBoms(project);
+            if (boms.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).entity("No BOMs found for this project").build();
+            }
+
+            // Return BOMs as JSON
+            return Response.ok().entity(boms).build(); //Kör kanske: return Response.ok(boms).build(); istället
+        } catch (Exception e) {
+            LOGGER.error("Error retrieving BOMs", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error retrieving BOMs").build();
+        }
+    }
+
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
