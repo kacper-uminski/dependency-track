@@ -18,7 +18,6 @@
  */
 package org.dependencytrack.persistence;
 
-import alpine.common.logging.Logger;
 import alpine.resources.AlpineRequest;
 import org.dependencytrack.model.Bom;
 import org.dependencytrack.model.Project;
@@ -29,9 +28,6 @@ import java.util.Date;
 import java.util.List;
 
 final class BomQueryManager extends QueryManager implements IQueryManager {
-
-    private static final alpine.common.logging.Logger LOGGER = Logger.getLogger(BomQueryManager.class);
-
 
     /**
      * Constructs a new QueryManager.
@@ -84,15 +80,6 @@ final class BomQueryManager extends QueryManager implements IQueryManager {
      */
     public void deleteBoms(Project project) {
         final Query<Bom> query = pm.newQuery(Bom.class, "project == :project");
-
-        List<Bom> bomsToDelete = (List<Bom>) query.execute(project);
-        if (bomsToDelete.isEmpty()) {
-            LOGGER.warn("No BOMs found for project: " + project.getUuid());
-        } else {
-            LOGGER.info("Deleting " + bomsToDelete.size() + " BOM(s) for project: " + project.getUuid());
-        }
-
         query.deletePersistentAll(project);
     }
-
 }
