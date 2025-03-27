@@ -40,12 +40,19 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonString;
 import jakarta.ws.rs.core.MediaType;
 
+<<<<<<< HEAD
+=======
+import java.io.File;
+import java.io.FileNotFoundException;
+>>>>>>> b4ae6b64f91e55a361b870fad4aac9f22ad6fdca
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Scanner;
+
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -113,6 +120,43 @@ public class SendMailPublisher implements Publisher {
             return;
 
         }
+<<<<<<< HEAD
+=======
+        // If do not want to get notified of a severity remove it from notifySeverities List at top
+        // Get txt file from src/test/resources/sevs.txt
+
+        String fileName = "C:/Users/erikm/Skola/TDDD96/dependency-track/src/test/resources/sevs.txt";
+
+
+        //String fileName = "C:/Users/rufus/IdeaProjects/test/src/sv.txt";
+
+        File file = new File(fileName);
+        Scanner scanner = null;
+        try {
+            scanner = new Scanner(file);
+        } catch (FileNotFoundException e) {
+            System.out.println("Whoops failed to scan sevs.txt or something");
+            throw new RuntimeException(e);
+        }
+        String line = scanner.nextLine();
+
+        String sevs = Arrays.toString(line.split(","));
+        System.out.println("sevs: " + sevs);
+        System.out.println("s.contains: " + sevs.contains("Severity.LOW"));
+
+        if(notification.getSubject() instanceof final NewVulnerabilityIdentified subject) {
+            if(!sevs.contains(subject.getVulnerability().getSeverity().toString())){
+                System.out.println("sevs does not contain severity level");
+                return;
+            }
+        }
+>>>>>>> b4ae6b64f91e55a361b870fad4aac9f22ad6fdca
+
+//        if(notification.getSubject() instanceof final NewVulnerabilityIdentified subject) {
+//            if(!notifySeverities.contains(subject.getVulnerability().getSeverity())){
+//                return;
+//            }
+//        }
 
         final String content;
         final String mimeType;
