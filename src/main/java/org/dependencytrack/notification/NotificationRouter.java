@@ -92,7 +92,7 @@ public class NotificationRouter implements Subscriber {
                     if (publisherClass != SendMailPublisher.class || rule.getTeams().isEmpty() || rule.getTeams() == null) {
                         publisher.inform(ruleCtx, restrictNotificationToRuleProjects(notification, rule), notificationPublisherConfig);
                     } else {
-                        ((SendMailPublisher) publisher).inform(ruleCtx, restrictNotificationToRuleProjects(notification, rule), notificationPublisherConfig, rule.getTeams());
+                        ((SendMailPublisher) publisher).inform(ruleCtx, restrictNotificationToRuleProjects(notification, rule), notificationPublisherConfig, rule.getTeams(), rule.getAllowedSeverities());
                     }
                 } else {
                     LOGGER.error("The defined notification publisher is not assignable from " + Publisher.class.getCanonicalName() + " (%s)".formatted(ruleCtx));

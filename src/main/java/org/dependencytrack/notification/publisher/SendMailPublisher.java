@@ -31,13 +31,15 @@ import io.pebbletemplates.pebble.extension.core.DisallowExtensionCustomizerBuild
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 import org.apache.commons.text.StringEscapeUtils;
 import org.dependencytrack.model.Severity;
-import org.dependencytrack.notification.vo.NewVulnerabilityIdentified;
+//import org.dependencytrack.notification.vo.NewVulnerabilityIdentified;
+//import org.dependencytrack.notification.vo.NewVulnerableDependency;
 import org.dependencytrack.persistence.QueryManager;
 import org.dependencytrack.util.DebugDataEncryption;
 
 import jakarta.json.JsonObject;
 import jakarta.json.JsonString;
 import jakarta.ws.rs.core.MediaType;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,11 +80,25 @@ public class SendMailPublisher implements Publisher {
         sendNotification(ctx, notification, config, destinations);
     }
 
-    public void inform(final PublishContext ctx, final Notification notification, final JsonObject config, List<Team> teams) {
+    public void inform(final PublishContext ctx, final Notification notification, final JsonObject config, List<Team> teams, List<Severity> notifySeverities) {
         if (config == null) {
             LOGGER.warn("No configuration found. Skipping notification. (%s)".formatted(ctx));
             return;
         }
+        /*
+        if (notification.getSubject() instanceof final NewVulnerabilityIdentified subject) {
+            if(!notifySeverities.contains(subject.getVulnerability().getSeverity())) {
+                return;
+            }
+        }
+        if (notification.getSubject() instanceof final NewVulnerableDependency subject) {
+            for (int i = 0; i < subject.getVulnerabilities().size()-1; i++) {
+                if(!notifySeverities.contains(subject.getVulnerabilities().get(i).getSeverity())) {
+                    return;
+                }
+            }
+        }
+        */
         final String[] destinations = parseDestination(config, teams);
         sendNotification(ctx, notification, config, destinations);
     }
@@ -96,12 +112,6 @@ public class SendMailPublisher implements Publisher {
             LOGGER.warn("No destination(s) provided; Skipping notification (%s)".formatted(ctx));
             return;
 
-        }
-        // If do not want to get notified of a severity remove it from notifySeverities List at top
-        if(notification.getSubject() instanceof final NewVulnerabilityIdentified subject) {
-            if(!notifySeverities.contains(subject.getVulnerability().getSeverity())){
-                return;
-            }
         }
 
         final String content;

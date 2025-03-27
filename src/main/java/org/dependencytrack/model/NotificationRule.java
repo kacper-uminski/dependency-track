@@ -45,12 +45,12 @@ import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 import javax.jdo.annotations.Unique;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.UUID;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
+import java.util.Collections;
 
 /**
  * Defines a Model class for notification configurations.
@@ -131,6 +131,10 @@ public class NotificationRule implements Serializable {
     @Persistent
     @Column(name = "NOTIFY_ON", length = 1024)
     private String notifyOn;
+
+    @Persistent
+    @Column(name = "SEVERITIES",length = 1024)
+    private String notifySeverities;
 
     @Persistent
     @Column(name = "MESSAGE", length = 1024)
@@ -270,6 +274,32 @@ public class NotificationRule implements Serializable {
             }
         }
         this.notifyOn = sb.toString();
+    }
+
+    public List<Severity> getAllowedSeverities(){
+        List<Severity> result = new ArrayList<>();
+        if (notifySeverities != null) {
+            String[] severities = notifySeverities.split(",");
+            for (String s: severities) {
+                result.add(Severity.valueOf(s.trim()));
+            }
+        }
+        return result;
+    }
+
+    public void setAllowedSeverities(List<Severity> notifySeverities){
+        if (notifySeverities.isEmpty()){
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        List<Severity> list = new ArrayList<>(notifySeverities);
+        for (int i=0; i<list.size(); i++) {
+            sb.append(list.get(i));
+            if (i+1 < list.size()) {
+                sb.append(",");
+            }
+        }
+        this.notifySeverities = sb.toString();
     }
 
     public NotificationPublisher getPublisher() {
