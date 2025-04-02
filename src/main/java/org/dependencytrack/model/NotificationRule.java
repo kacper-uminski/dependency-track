@@ -133,7 +133,7 @@ public class NotificationRule implements Serializable {
     private String notifyOn;
 
     @Persistent
-    @Column(name = "SEVERITIES",length = 1024)
+    @Column(name = "SEVERITIES", length = 1024)
     private String notifySeverities;
 
     @Persistent
@@ -288,14 +288,15 @@ public class NotificationRule implements Serializable {
     }
 
     public void setAllowedSeverities(List<Severity> notifySeverities){
+        System.out.println(notifySeverities + "SetAllowedSeverities");
         if (notifySeverities.isEmpty()){
+            this.notifySeverities = null;
             return;
         }
         StringBuilder sb = new StringBuilder();
-        List<Severity> list = new ArrayList<>(notifySeverities);
-        for (int i=0; i<list.size(); i++) {
-            sb.append(list.get(i));
-            if (i+1 < list.size()) {
+        for (int i=0; i<notifySeverities.size(); i++) {
+            sb.append(notifySeverities.get(i));
+            if (i+1 < notifySeverities.size()) {
                 sb.append(",");
             }
         }
