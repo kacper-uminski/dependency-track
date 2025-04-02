@@ -23,6 +23,7 @@ import alpine.model.IConfigProperty;
 import alpine.server.filters.ApiFilter;
 import alpine.server.filters.AuthenticationFilter;
 import com.fasterxml.jackson.core.StreamReadConstraints;
+import jakarta.json.JsonArray;
 import org.apache.http.HttpStatus;
 import org.dependencytrack.JerseyTestRule;
 import org.dependencytrack.ResourceTest;
@@ -815,6 +816,48 @@ public class BomResourceTest extends ResourceTest {
         Assert.assertNull(response.getHeaderString(TOTAL_COUNT_HEADER));
         String body = getPlainTextBody(response);
         Assert.assertEquals("The component could not be found.", body);
+    }
+
+    @Test
+    public void removeBomTest() throws Exception {
+        //Start by uploading a BOM
+        initializeWithPermissions(Permissions.BOM_UPLOAD);
+        Project project = qm.createProject("Acme Example", null, "1.0", null, null, null, true, false);
+        String bomString = Base64.getEncoder().encodeToString(resourceToByteArray("/unit/bom-1.xml"));
+        BomSubmitRequest request = new BomSubmitRequest(project.getUuid().toString(), null, null, null, false, false, bomString);
+        Response response = jersey.target(V1_BOM).request()
+                .header(X_API_KEY, apiKey)
+                .put(Entity.entity(request, MediaType.APPLICATION_JSON));
+        Assert.assertEquals(200, response.getStatus(), 0);
+        JsonObject json = parseJsonObject(response);
+        Assert.assertNotNull(json);
+        Assert.assertNotNull(json.getString("token"));
+        Assert.assertTrue(UuidUtil.isValidUUID(json.getString("token")));
+        //Remove the BOM
+        Response deleteResponse = jersey.target(V1_BOM + "/project/" + project.getUuid())
+                .request()
+                .header(X_API_KEY, apiKey)
+                .delete();
+        Assert.assertEquals(200, deleteResponse.getStatus());
+        //Try to get the BOM and assert if boms is empty
+        Response getBomResponse = jersey.target(V1_BOM + "/project/" + project.getUuid() + "/boms")
+                .request()
+                .header(X_API_KEY, apiKey)
+                .get();
+        Assert.assertEquals(200, getBomResponse.getStatus());
+        JsonArray bomsArray = parseJsonArray(getBomResponse);
+        Assert.assertTrue("Expected no BOMs after deletion", bomsArray.isEmpty());
+    }
+
+    @Test
+    public void removeBomFakeProjectTest() {
+        initializeWithPermissions(Permissions.BOM_UPLOAD);
+        UUID fakeUuid = UUID.randomUUID();
+        Response deleteResponse = jersey.target(V1_BOM + "/project/" + fakeUuid)
+                .request()
+                .header(X_API_KEY, apiKey)
+                .delete();
+        Assert.assertEquals(404, deleteResponse.getStatus());
     }
 
     @Test
