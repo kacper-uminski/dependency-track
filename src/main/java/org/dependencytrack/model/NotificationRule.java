@@ -133,7 +133,7 @@ public class NotificationRule implements Serializable {
     private String notifyOn;
 
     @Persistent
-    @Column(name = "SEVERITIES", length = 1024)
+    @Column(name = "NOTIFY_SEVERITIES", length = 1024)
     private String notifySeverities;
 
     @Persistent

@@ -69,7 +69,7 @@ public class SendMailPublisher implements Publisher {
             .newLineTrimming(false)
             .build();
 
-    private static final List<Severity> notifySeverities = Arrays.asList(Severity.LOW, Severity.MEDIUM, Severity.HIGH, Severity.UNASSIGNED, Severity.CRITICAL);
+    private static final List<Severity> notifyOnChosenSeverities = Arrays.asList(Severity.LOW, Severity.MEDIUM, Severity.HIGH, Severity.UNASSIGNED, Severity.CRITICAL);
 
     public void inform(final PublishContext ctx, final Notification notification, final JsonObject config) {
         if (config == null) {
@@ -116,7 +116,7 @@ public class SendMailPublisher implements Publisher {
 
 
         if(notification.getSubject() instanceof final NewVulnerabilityIdentified subject) {
-            if(!notifySeverities.contains(subject.getVulnerability().getSeverity())){
+            if(!notifyOnChosenSeverities.contains(subject.getVulnerability().getSeverity())){
                 return;
             }
         }
