@@ -276,7 +276,7 @@ public class NotificationRule implements Serializable {
         this.notifyOn = sb.toString();
     }
 
-    public List<Severity> getAllowedSeverities(){
+    public List<Severity> getNotifySeverities(){
         List<Severity> result = new ArrayList<>();
         if (notifySeverities != null) {
             String[] severities = notifySeverities.split(",");
@@ -287,7 +287,7 @@ public class NotificationRule implements Serializable {
         return result;
     }
 
-    public void setAllowedSeverities(List<Severity> notifySeverities){
+    public void setNotifySeverities(List<Severity> notifySeverities){
         System.out.println(notifySeverities + "SetAllowedSeverities");
         if (notifySeverities.isEmpty()){
             this.notifySeverities = null;
