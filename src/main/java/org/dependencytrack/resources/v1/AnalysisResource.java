@@ -175,7 +175,7 @@ public class AnalysisResource extends AlpineResource {
             for (Project project1 : allProjects) {
                 List<Component> komponenter = qm.getAllComponents(project1);
                 for (Component c : komponenter) {
-                    if (c.getName().equals(component.getName()) & c.getVersion().equals(component.getVersion())) {
+                    if (c.getName().equals(component.getName()) & c.getVersion().compareTo(component.getVersion()) <= 0) {
                         matchingComponents.add(c);
                     }
                 }
