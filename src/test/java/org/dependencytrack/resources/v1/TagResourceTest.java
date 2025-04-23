@@ -7,6 +7,7 @@ import org.dependencytrack.JerseyTestRule;
 import org.dependencytrack.ResourceTest;
 import org.dependencytrack.auth.Permissions;
 import org.dependencytrack.model.NotificationRule;
+import org.dependencytrack.model.NotificationTriggerType;
 import org.dependencytrack.model.Policy;
 import org.dependencytrack.model.Project;
 import org.dependencytrack.model.Tag;
@@ -92,11 +93,13 @@ public class TagResourceTest extends ResourceTest {
         final var notificationRuleA = new NotificationRule();
         notificationRuleA.setName("rule-a");
         notificationRuleA.setScope(NotificationScope.PORTFOLIO);
+        notificationRuleA.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRuleA);
 
         final var notificationRuleB = new NotificationRule();
         notificationRuleB.setName("rule-b");
         notificationRuleB.setScope(NotificationScope.PORTFOLIO);
+        notificationRuleB.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRuleB);
 
         qm.bind(notificationRuleA, List.of(tagFoo));
@@ -486,6 +489,7 @@ public class TagResourceTest extends ResourceTest {
         final var notificationRule = new NotificationRule();
         notificationRule.setName("rule");
         notificationRule.setScope(NotificationScope.PORTFOLIO);
+        notificationRule.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRule);
 
         qm.bind(notificationRule, List.of(usedTag));
@@ -512,6 +516,7 @@ public class TagResourceTest extends ResourceTest {
         final var notificationRule = new NotificationRule();
         notificationRule.setName("rule");
         notificationRule.setScope(NotificationScope.PORTFOLIO);
+        notificationRule.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRule);
 
         qm.bind(notificationRule, List.of(usedTag));
@@ -534,6 +539,37 @@ public class TagResourceTest extends ResourceTest {
                 }
                 """);
 
+        qm.getPersistenceManager().evictAll();
+        assertThat(qm.getTagByName("foo")).isNotNull();
+        assertThat(qm.getTagByName("bar")).isNotNull();
+    }
+
+    @Test
+    public void createTagsTest() {
+        initializeWithPermissions(Permissions.TAG_MANAGEMENT);
+
+        final Response response = jersey.target(V1_TAG)
+                .request()
+                .header(X_API_KEY, apiKey)
+                .property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true)
+                .method(HttpMethod.PUT, Entity.json(List.of("foo")));
+        assertThat(response.getStatus()).isEqualTo(201);
+        qm.getPersistenceManager().evictAll();
+        assertThat(qm.getTagByName("foo")).isNotNull();
+    }
+
+    @Test
+    public void createTagsWithExistingTest() {
+        initializeWithPermissions(Permissions.TAG_MANAGEMENT);
+
+        qm.createTag("foo");
+
+        final Response response = jersey.target(V1_TAG)
+                .request()
+                .header(X_API_KEY, apiKey)
+                .property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true)
+                .method(HttpMethod.PUT, Entity.json(List.of("foo", "bar")));
+        assertThat(response.getStatus()).isEqualTo(201);
         qm.getPersistenceManager().evictAll();
         assertThat(qm.getTagByName("foo")).isNotNull();
         assertThat(qm.getTagByName("bar")).isNotNull();
@@ -1400,11 +1436,13 @@ public class TagResourceTest extends ResourceTest {
         final var notificationRuleA = new NotificationRule();
         notificationRuleA.setName("rule-a");
         notificationRuleA.setScope(NotificationScope.PORTFOLIO);
+        notificationRuleA.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRuleA);
 
         final var notificationRuleB = new NotificationRule();
         notificationRuleB.setName("rule-b");
         notificationRuleB.setScope(NotificationScope.PORTFOLIO);
+        notificationRuleB.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRuleB);
 
         qm.bind(notificationRuleA, List.of(tagFoo));
@@ -1438,6 +1476,7 @@ public class TagResourceTest extends ResourceTest {
             final var notificationRule = new NotificationRule();
             notificationRule.setName("rule-" + (i+1));
             notificationRule.setScope(NotificationScope.PORTFOLIO);
+            notificationRule.setTriggerType(NotificationTriggerType.EVENT);
             qm.persist(notificationRule);
 
             qm.bind(notificationRule, List.of(tag));
@@ -1525,11 +1564,13 @@ public class TagResourceTest extends ResourceTest {
         final var notificationRuleA = new NotificationRule();
         notificationRuleA.setName("rule-a");
         notificationRuleA.setScope(NotificationScope.PORTFOLIO);
+        notificationRuleA.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRuleA);
 
         final var notificationRuleB = new NotificationRule();
         notificationRuleB.setName("rule-b");
         notificationRuleB.setScope(NotificationScope.PORTFOLIO);
+        notificationRuleB.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRuleB);
 
         qm.createTag("foo");
@@ -1537,6 +1578,7 @@ public class TagResourceTest extends ResourceTest {
         final var notificationRuleC = new NotificationRule();
         notificationRuleC.setName("rule-c");
         notificationRuleC.setScope(NotificationScope.PORTFOLIO);
+        notificationRuleC.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRuleC);
 
         qm.bind(notificationRuleC, List.of(qm.createTag("bar")));
@@ -1562,6 +1604,7 @@ public class TagResourceTest extends ResourceTest {
         final var notificationRule = new NotificationRule();
         notificationRule.setName("rule");
         notificationRule.setScope(NotificationScope.PORTFOLIO);
+        notificationRule.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRule);
 
         final Response response = jersey.target(V1_TAG + "/foo/notificationRule")
@@ -1609,11 +1652,13 @@ public class TagResourceTest extends ResourceTest {
         final var notificationRuleA = new NotificationRule();
         notificationRuleA.setName("rule-a");
         notificationRuleA.setScope(NotificationScope.PORTFOLIO);
+        notificationRuleA.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRuleA);
 
         final var notificationRuleB = new NotificationRule();
         notificationRuleB.setName("rule-b");
         notificationRuleB.setScope(NotificationScope.PORTFOLIO);
+        notificationRuleB.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRuleB);
 
         final Tag tag = qm.createTag("foo");
@@ -1639,6 +1684,7 @@ public class TagResourceTest extends ResourceTest {
         final var notificationRule = new NotificationRule();
         notificationRule.setName("rule");
         notificationRule.setScope(NotificationScope.PORTFOLIO);
+        notificationRule.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRule);
 
         final Response response = jersey.target(V1_TAG + "/foo/notificationRule")
@@ -1717,6 +1763,7 @@ public class TagResourceTest extends ResourceTest {
         final var notificationRule = new NotificationRule();
         notificationRule.setName("rule");
         notificationRule.setScope(NotificationScope.PORTFOLIO);
+        notificationRule.setTriggerType(NotificationTriggerType.EVENT);
         qm.persist(notificationRule);
 
         qm.createTag("foo");
