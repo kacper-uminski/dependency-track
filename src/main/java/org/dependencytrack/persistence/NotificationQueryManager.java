@@ -28,8 +28,6 @@ import org.dependencytrack.model.NotificationPublisher;
 import org.dependencytrack.model.NotificationRule;
 import org.dependencytrack.model.NotificationTriggerType;
 import org.dependencytrack.model.PolicyCondition;
-import org.dependencytrack.model.NotificationPublisher;
-//import org.dependencytrack.model.Severity;
 import org.dependencytrack.model.Project;
 import org.dependencytrack.model.Tag;
 import org.dependencytrack.model.Vulnerability;

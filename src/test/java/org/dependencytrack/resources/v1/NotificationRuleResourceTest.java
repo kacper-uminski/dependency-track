@@ -172,6 +172,7 @@ public class NotificationRuleResourceTest extends ResourceTest {
                   "tags": [],
                   "teams": [],
                   "notifyOn": [],
+                  "notifySeverities":[],
                   "publisher": {
                     "name": "Slack",
                     "description": "${json-unit.any-string}",
@@ -298,6 +299,7 @@ public class NotificationRuleResourceTest extends ResourceTest {
                           ],
                           "teams": [],
                           "notifyOn": [],
+                          "notifySeverities":[],
                           "publisher": {
                             "name": "${json-unit.any-string}",
                             "description": "${json-unit.any-string}",
@@ -346,6 +348,7 @@ public class NotificationRuleResourceTest extends ResourceTest {
                           ],
                           "teams": [],
                           "notifyOn": [],
+                          "notifySeverities":[],
                           "publisher": {
                             "name": "${json-unit.any-string}",
                             "description": "${json-unit.any-string}",
@@ -431,6 +434,7 @@ public class NotificationRuleResourceTest extends ResourceTest {
                           "scope": "PORTFOLIO",
                           "notificationLevel": "INFORMATIONAL",
                           "notifyOn": ["NEW_VULNERABILITIES_SUMMARY"],
+                          "notifySeverities":[],
                           "triggerType": "SCHEDULE",
                           "scheduleCron": "6 6 6 6 6"
                         }
@@ -452,6 +456,7 @@ public class NotificationRuleResourceTest extends ResourceTest {
                           "tags": [],
                           "teams": [],
                           "notifyOn": ["NEW_VULNERABILITIES_SUMMARY"],
+                          "notifySeverities":[],
                           "triggerType": "SCHEDULE",
                           "scheduleLastTriggeredAt": "${json-unit.matches:unmodifiedScheduleLastTriggeredAt}",
                           "scheduleNextTriggerAt": "${json-unit.matches:modifiedScheduleNextTriggerAt}",
@@ -753,6 +758,7 @@ public class NotificationRuleResourceTest extends ResourceTest {
                             }
                           ],
                           "notifyOn": [],
+                          "notifySeverities":[],
                           "publisher": {
                             "name": "foo",
                             "description": "description",

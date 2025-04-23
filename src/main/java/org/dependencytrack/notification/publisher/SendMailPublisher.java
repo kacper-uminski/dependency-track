@@ -69,8 +69,6 @@ public class SendMailPublisher implements Publisher {
             .newLineTrimming(false)
             .build();
 
-    private static final List<Severity> notifyOnChosenSeverities = Arrays.asList(Severity.LOW, Severity.MEDIUM, Severity.HIGH, Severity.UNASSIGNED, Severity.CRITICAL);
-
     public void inform(final PublishContext ctx, final Notification notification, final JsonObject config) {
         if (config == null) {
             LOGGER.warn("No configuration found; Skipping notification (%s)".formatted(ctx));
@@ -85,20 +83,13 @@ public class SendMailPublisher implements Publisher {
             LOGGER.warn("No configuration found. Skipping notification. (%s)".formatted(ctx));
             return;
         }
-        /*
+
         if (notification.getSubject() instanceof final NewVulnerabilityIdentified subject) {
             if(!notifySeverities.contains(subject.getVulnerability().getSeverity())) {
                 return;
             }
         }
-        if (notification.getSubject() instanceof final NewVulnerableDependency subject) {
-            for (int i = 0; i < subject.getVulnerabilities().size()-1; i++) {
-                if(!notifySeverities.contains(subject.getVulnerabilities().get(i).getSeverity())) {
-                    return;
-                }
-            }
-        }
-        */
+
         final String[] destinations = parseDestination(config, teams);
         sendNotification(ctx, notification, config, destinations);
     }
@@ -111,14 +102,6 @@ public class SendMailPublisher implements Publisher {
         if (destinations == null) {
             LOGGER.warn("No destination(s) provided; Skipping notification (%s)".formatted(ctx));
             return;
-
-        }
-
-
-        if(notification.getSubject() instanceof final NewVulnerabilityIdentified subject) {
-            if(!notifyOnChosenSeverities.contains(subject.getVulnerability().getSeverity())){
-                return;
-            }
         }
 
         final String content;
