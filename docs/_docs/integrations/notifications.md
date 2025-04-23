@@ -73,6 +73,22 @@ multiple levels, while others can only ever have a single level.
 | PORTFOLIO | POLICY_VIOLATION              | Event    | INFORMATIONAL | Notifications generated whenever a policy violation is identified                                                                 |
 | PORTFOLIO | NEW_POLICY_VIOLATIONS_SUMMARY | Schedule | INFORMATIONAL | Summary of new policy violations identified in a set of projects                                                                  |
 
+## Configuring Severities
+
+A **severity** is a Dependency-Track concept defining the seriousness of an event and controlling which notifications are sent based on the user’s selected levels. 
+Only events matching one of the checked severities will trigger a notification.  
+Only events which trigger `NEW_VULNERABILITY_IDENTIFIED` and **Mail** notifications will be triggered.
+Select the severity levels to be notified about. **The default is to notify about no severity levels**.
+
+| Severity   | Level | Description                              |
+|------------|:-----:|------------------------------------------|
+| CRITICAL   |   5   | Issues that require immediate attention  |
+| HIGH       |   4   | High-severity issues                     |
+| MEDIUM     |   3   | Moderate-severity issues                 |
+| LOW        |   2   | Low-severity issues                      |
+| INFO       |   1   | Informational messages                   |
+| UNASSIGNED |   0   | No severity assigned (treated as lowest) |
+
 ## Configuring Publishers
 
 A notification publisher is a Dependency-Track concept allowing users to describe the structure of a notification (i.e. MIME type, template) and how to send a notification (i.e. publisher class).
