@@ -198,7 +198,6 @@ public class AnalysisResource extends AlpineResource {
             List<Analysis> analysisList = new ArrayList<>();
             boolean suppressed = Boolean.TRUE.equals(request.isSuppressed());
 
-            Analysis trueAnalysis = qm.getAnalysis(component, vulnerability);
             for (Component currComp : matchingComponents) {
                 boolean analysisStateChange = false;
                 boolean suppressionChange = false;
@@ -222,13 +221,16 @@ public class AnalysisResource extends AlpineResource {
                     if (AnalysisState.NOT_SET != request.getAnalysisState()) {
                         qm.makeAnalysisComment(analysis, String.format("Analysis: %s → %s", AnalysisState.NOT_SET, request.getAnalysisState()), commenter);
                     }
-                    final String comment = StringUtils.trimToNull(request.getComment());
+                }
+                final String comment = StringUtils.trimToNull(request.getComment());
+                if(comment != null) {
                     qm.makeAnalysisComment(analysis, comment, commenter);
                 }
                 analysis = qm.getAnalysis(currComp, vulnerability);
                 analysisList.add(analysis);
                 NotificationUtil.analyzeNotificationCriteria(qm, analysisList, analysisStateChange, suppressionChange);
             }
+            Analysis trueAnalysis = qm.getAnalysis(component, vulnerability);
             return Response.ok(trueAnalysis).build();
         }
     }
