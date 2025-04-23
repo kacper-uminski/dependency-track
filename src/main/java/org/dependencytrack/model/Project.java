@@ -245,6 +245,7 @@ public class Project implements Serializable {
     @Schema(type = "string")
     private String purl;
 
+
     @Persistent
     @Index(name = "PROJECT_SWID_TAGID_IDX")
     @Size(max = 255)
