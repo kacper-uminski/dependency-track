@@ -62,6 +62,7 @@ import org.slf4j.MDC;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -119,6 +120,8 @@ public class BomUploadProcessingTask implements Subscriber {
         private String bomSpecVersion;
         private String bomSerialNumber;
         private Integer bomVersion;
+        org.cyclonedx.model.Bom cdxBom;
+
 
         private Context(final UUID token, final Project project, final byte[] bomBytes) {
             this.token = token;
@@ -164,7 +167,7 @@ public class BomUploadProcessingTask implements Subscriber {
             dispatchBomProcessingFailedNotification(ctx, e);
             return;
         }
-
+        ctx.cdxBom = cdxBom;
         ctx.bomSpecVersion = cdxBom.getSpecVersion();
         ctx.bomVersion = cdxBom.getVersion();
         if (cdxBom.getSerialNumber() != null) {
@@ -578,6 +581,20 @@ public class BomUploadProcessingTask implements Subscriber {
         bom.setBomVersion(ctx.bomVersion);
         bom.setImported(bomImportDate);
         qm.persist(bom);
+
+        //set the bom timestamp from CycloneDX bom metadata
+        if (ctx != null) {
+            try {
+                org.cyclonedx.model.Metadata metadata = ctx.cdxBom.getMetadata();
+                if (metadata != null && metadata.getTimestamp() != null) {
+                    Instant generatedAt = metadata.getTimestamp().toInstant();
+                    bom.setBomTimestamp(Date.from(generatedAt));
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Unable to extract BOM timestamp", e);
+
+            }
+        }
 
         project.setLastBomImport(bomImportDate);
         project.setLastBomImportFormat("%s %s".formatted(ctx.bomFormat.getFormatShortName(), ctx.bomSpecVersion));

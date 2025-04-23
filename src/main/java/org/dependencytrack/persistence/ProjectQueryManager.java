@@ -41,22 +41,7 @@ import org.dependencytrack.auth.Permissions;
 import org.dependencytrack.event.IndexEvent;
 import org.dependencytrack.event.ProjectMetricsUpdateEvent;
 import org.dependencytrack.exception.ProjectOperationException;
-import org.dependencytrack.model.Analysis;
-import org.dependencytrack.model.AnalysisComment;
-import org.dependencytrack.model.Classifier;
-import org.dependencytrack.model.Component;
-import org.dependencytrack.model.ComponentProperty;
-import org.dependencytrack.model.ConfigPropertyConstants;
-import org.dependencytrack.model.FindingAttribution;
-import org.dependencytrack.model.PolicyViolation;
-import org.dependencytrack.model.Project;
-import org.dependencytrack.model.ProjectCollectionLogic;
-import org.dependencytrack.model.ProjectMetadata;
-import org.dependencytrack.model.ProjectProperty;
-import org.dependencytrack.model.ProjectVersion;
-import org.dependencytrack.model.ServiceComponent;
-import org.dependencytrack.model.Tag;
-import org.dependencytrack.model.Vulnerability;
+import org.dependencytrack.model.*;
 import org.dependencytrack.notification.NotificationConstants;
 import org.dependencytrack.notification.NotificationGroup;
 import org.dependencytrack.notification.NotificationScope;
@@ -1440,10 +1425,31 @@ final class ProjectQueryManager extends QueryManager implements IQueryManager {
     @Override
     public Project updateLastBomImport(Project p, Date date, String bomFormat) {
         final Project project = getObjectById(Project.class, p.getId());
+
         project.setLastBomImport(date);
         project.setLastBomImportFormat(bomFormat);
+
+        // ⬇️ NEW: Retrieve the most recent BOM and set its timestamp to Project
+        final Query<Bom> query = this.pm.newQuery(Bom.class);
+        query.setFilter("project == :project");
+        query.setOrdering("imported descending");
+        query.setRange(0, 1);
+
+        @SuppressWarnings("unchecked")
+        final List<Bom> result = (List<Bom>) query.execute(project);
+        if (result != null && !result.isEmpty()) {
+            Bom latestBom = result.get(0);
+            if (latestBom.getBomTimestamp() != null) {
+                project.setBomTimestamp(latestBom.getBomTimestamp());
+            }
+            System.out.println("Setting project bomTimestamp: " + latestBom.getBomTimestamp());
+
+
+        }
+
         return persist(project);
     }
+
 
     @Override
     public boolean hasAccess(final Principal principal, final Project project) {

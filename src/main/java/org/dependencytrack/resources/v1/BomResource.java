@@ -692,4 +692,8 @@ public class BomResource extends AlpineResource {
             .subject(new BomValidationFailed(project, bom, errors, bomFormat)));
     }
 
+    //Create function that retrieves timestamp from BOM as a string, and formats it correctly
+    //and thereafter create a PUT method and put the frontend value to the timestamp
+    //private static String bomTimestamp etc
+
 }

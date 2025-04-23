@@ -306,6 +306,11 @@ public class Project implements Serializable {
     @Column(name = "LAST_RISKSCORE", allowsNull = "true") // New column, must allow nulls on existing databases))
     private Double lastInheritedRiskScore;
 
+    @Schema(type = "string", format = "date-time", description = "Timestamp when the BOM was generated (from BOM metadata)")
+    @javax.jdo.annotations.NotPersistent
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Date bomTimestamp;
+
     /**
      * Convenience field which will contain the date of the last vulnerability analysis of the {@link Bom} components
      */
@@ -622,6 +627,14 @@ public class Project implements Serializable {
 
     public List<ProjectVersion> getVersions() {
         return versions;
+    }
+
+    public Date getBomTimestamp() {
+        return bomTimestamp;
+    }
+
+    public void setBomTimestamp(Date bomTimestamp) {
+        this.bomTimestamp = bomTimestamp;
     }
 
     public void setVersions(List<ProjectVersion> versions) {
