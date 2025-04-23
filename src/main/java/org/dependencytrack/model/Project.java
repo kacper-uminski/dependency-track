@@ -109,8 +109,20 @@ import java.util.UUID;
                 @Persistent(name = "lastInheritedRiskScore"),
                 @Persistent(name = "uuid")
         }),
+        @FetchGroup(name = "NOTIFICATION", members = {
+                @Persistent(name = "id"),
+                @Persistent(name = "name"),
+                @Persistent(name = "version"),
+                @Persistent(name = "description"),
+                @Persistent(name = "purl"),
+                @Persistent(name = "tags"),
+                @Persistent(name = "uuid")
+        }),
         @FetchGroup(name = "PARENT", members = {
                 @Persistent(name = "parent")
+        }),
+        @FetchGroup(name = "PROJECT_TAGS", members = {
+                @Persistent(name = "tags")
         }),
         @FetchGroup(name = "PORTFOLIO_METRICS_UPDATE", members = {
                 @Persistent(name = "id"),
@@ -136,8 +148,10 @@ public class Project implements Serializable {
         ALL,
         METADATA,
         METRICS_UPDATE,
+        NOTIFICATION,
         PARENT,
         PORTFOLIO_METRICS_UPDATE,
+        PROJECT_TAGS,
         PROJECT_VULN_ANALYSIS
     }
 
@@ -290,6 +304,14 @@ public class Project implements Serializable {
     @Index(name = "PROJECT_LAST_RISKSCORE_IDX")
     @Column(name = "LAST_RISKSCORE", allowsNull = "true") // New column, must allow nulls on existing databases))
     private Double lastInheritedRiskScore;
+
+    /**
+     * Convenience field which will contain the date of the last vulnerability analysis of the {@link Bom} components
+     */
+    @Persistent
+    @Column(name = "LAST_VULNERABILITY_ANALYSIS", allowsNull = "true")
+    @Schema(type = "integer", format = "int64", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "UNIX epoch timestamp in milliseconds")
+    private Date lastVulnerabilityAnalysis;
 
     @Persistent
     @Column(name = "ACTIVE", defaultValue = "true")
@@ -538,6 +560,14 @@ public class Project implements Serializable {
 
     public void setLastBomImportFormat(String lastBomImportFormat) {
         this.lastBomImportFormat = lastBomImportFormat;
+    }
+
+    public Date getLastVulnerabilityAnalysis() {
+        return lastVulnerabilityAnalysis;
+    }
+
+    public void setLastVulnerabilityAnalysis(Date lastVulnerabilityAnalysis) {
+        this.lastVulnerabilityAnalysis = lastVulnerabilityAnalysis;
     }
 
     public Double getLastInheritedRiskScore() {
