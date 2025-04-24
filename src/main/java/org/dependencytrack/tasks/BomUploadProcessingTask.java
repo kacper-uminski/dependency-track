@@ -292,7 +292,7 @@ public class BomUploadProcessingTask implements Subscriber {
                 LOGGER.info("Processing %d dependency graph entries".formatted(numDependencyGraphEntries));
                 processDependencyGraph(qm, persistentProject, dependencyGraph, persistentComponentsByIdentity, identitiesByBomRef);
 
-                recordBomImport(ctx, qm, persistentProject);
+                recordBomImportAndGenerated(ctx, qm, persistentProject);
 
                 processedComponents.addAll(persistentComponentsByIdentity.values());
             });
@@ -568,7 +568,7 @@ public class BomUploadProcessingTask implements Subscriber {
         return persistentServiceByIdentity;
     }
 
-    private void recordBomImport(final Context ctx, final QueryManager qm, final Project project) {
+    private void recordBomImportAndGenerated(final Context ctx, final QueryManager qm, final Project project) {
         assertPersistent(project, "Project must be persistent");
 
         final var bomImportDate = new Date();
@@ -582,18 +582,18 @@ public class BomUploadProcessingTask implements Subscriber {
         bom.setImported(bomImportDate);
         qm.persist(bom);
 
-        //set the bom timestamp from CycloneDX bom metadata
-        if (ctx != null) {
-            try {
-                org.cyclonedx.model.Metadata metadata = ctx.cdxBom.getMetadata();
-                if (metadata != null && metadata.getTimestamp() != null) {
-                    Instant generatedAt = metadata.getTimestamp().toInstant();
-                    bom.setBomTimestamp(Date.from(generatedAt));
-                }
-            } catch (Exception e) {
-                LOGGER.warn("Unable to extract BOM timestamp", e);
-
+        //set the bom generated timestamp from CycloneDX bom metadata
+        //if no timestamp in metadata of bom, then bom generated timestamp will be same as lastBomImport
+        try {
+            org.cyclonedx.model.Metadata metadata = ctx.cdxBom.getMetadata();
+            if (metadata != null && metadata.getTimestamp() != null) {
+                Instant generatedAt = metadata.getTimestamp().toInstant();
+                project.setBomTimestamp(Date.from(generatedAt));
+            } else {
+                project.setBomTimestamp(null);
             }
+        } catch (Exception e) {
+            LOGGER.warn("Unable to extract BOM timestamp", e);
         }
 
         project.setLastBomImport(bomImportDate);

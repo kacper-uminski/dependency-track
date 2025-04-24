@@ -306,8 +306,13 @@ public class Project implements Serializable {
     @Column(name = "LAST_RISKSCORE", allowsNull = "true") // New column, must allow nulls on existing databases))
     private Double lastInheritedRiskScore;
 
+    /**
+     * Convenience field which stores the timestamp of when the BOM was generated (from BOM metadata).
+     */
+    @Persistent
+    @Index(name = "PROJECT_BOM_TIMESTAMP_IDX")
+    @Column(name = "BOM_TIMESTAMP", jdbcType = "BIGINT", allowsNull = "true")
     @Schema(type = "string", format = "date-time", description = "Timestamp when the BOM was generated (from BOM metadata)")
-    @javax.jdo.annotations.NotPersistent
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date bomTimestamp;
 
