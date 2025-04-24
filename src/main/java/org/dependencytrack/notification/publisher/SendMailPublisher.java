@@ -28,8 +28,7 @@ import io.pebbletemplates.pebble.extension.core.DisallowExtensionCustomizerBuild
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 import org.apache.commons.text.StringEscapeUtils;
 import org.dependencytrack.model.Severity;
-//import org.dependencytrack.notification.vo.NewVulnerabilityIdentified;
-//import org.dependencytrack.notification.vo.NewVulnerableDependency;
+import org.dependencytrack.notification.vo.NewVulnerabilityIdentified;
 import org.dependencytrack.persistence.QueryManager;
 import org.dependencytrack.util.DebugDataEncryption;
 
@@ -42,6 +41,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+
 import java.util.function.Predicate;
 
 import static org.dependencytrack.model.ConfigPropertyConstants.EMAIL_PREFIX;

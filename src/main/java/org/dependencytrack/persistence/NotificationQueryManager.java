@@ -160,7 +160,9 @@ public class NotificationQueryManager extends QueryManager implements IQueryMana
             rule.setPublisherConfig(transientRule.getPublisherConfig());
             rule.setNotifyOn(transientRule.getNotifyOn());
             rule.setAllowedSeverities(transientRule.getAllowedSeverities());
-            System.out.println(transientRule.getAllowedSeverities());
+            //rule.setAllowedSeverities(List.of(Severity.CRITICAL, Severity.HIGH));
+            //System.out.println(rule.getAllowedSeverities() + " rule.getAllowedSeverities");
+            //System.out.println(transientRule.getAllowedSeverities() + " transientRUle.getAllowedSeverities");
             bind(rule, resolveTags(transientRule.getTags()));
             return rule;
         });
