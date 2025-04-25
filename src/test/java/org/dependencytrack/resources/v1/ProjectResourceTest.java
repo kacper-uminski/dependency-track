@@ -39,6 +39,7 @@ import org.dependencytrack.model.AnalysisResponse;
 import org.dependencytrack.model.AnalysisState;
 import org.dependencytrack.model.Component;
 import org.dependencytrack.model.ComponentIdentity;
+import org.dependencytrack.model.ComponentProperty;
 import org.dependencytrack.model.ConfigPropertyConstants;
 import org.dependencytrack.model.ExternalReference;
 import org.dependencytrack.model.OrganizationalContact;
@@ -1068,7 +1069,7 @@ public class ProjectResourceTest extends ResourceTest {
             var t = new Tag();
             t.setName(name);
             return t;
-        }).collect(Collectors.toList()));
+        }).collect(Collectors.toSet()));
 
         // update the 1st time and add another tag
         var response = jersey.target(V1_PROJECT)
@@ -1100,7 +1101,7 @@ public class ProjectResourceTest extends ResourceTest {
         Assert.assertEquals("tag3", jsonTags.get(2).asJsonObject().getString("name"));
 
         // and finally delete one of the tags
-        jsonProject.getTags().remove(0);
+        jsonProject.getTags().removeIf(tag -> "tag1".equals(tag.getName()));
         response = jersey.target(V1_PROJECT)
                 .request()
                 .header(X_API_KEY, apiKey)
@@ -1503,7 +1504,7 @@ public class ProjectResourceTest extends ResourceTest {
             var t = new Tag();
             t.setName(name);
             return t;
-        }).collect(Collectors.toUnmodifiableList()));
+        }).collect(Collectors.toSet()));
         final var jsonProjectManufacturerContact = new OrganizationalContact();
         jsonProjectManufacturerContact.setName("newManufacturerContactName");
         final var jsonProjectManufacturer = new OrganizationalEntity();
@@ -1919,6 +1920,14 @@ public class ProjectResourceTest extends ResourceTest {
         componentA.setSupplier(componentSupplier);
         qm.persist(componentA);
 
+        final var componentProperty = new ComponentProperty();
+        componentProperty.setComponent(componentA);
+        componentProperty.setGroupName("groupName");
+        componentProperty.setPropertyName("propertyName");
+        componentProperty.setPropertyValue("propertyValue");
+        componentProperty.setPropertyType(PropertyType.STRING);
+        qm.persist(componentProperty);
+
         final var componentB = new Component();
         componentB.setProject(project);
         componentB.setName("acme-lib-b");
@@ -2031,6 +2040,13 @@ public class ProjectResourceTest extends ResourceTest {
                                                   }
                                                 ]
                                                 """);
+
+                                assertThat(clonedComponent.getProperties()).satisfiesExactly(property -> {
+                                    assertThat(property.getGroupName()).isEqualTo("groupName");
+                                    assertThat(property.getPropertyName()).isEqualTo("propertyName");
+                                    assertThat(property.getPropertyValue()).isEqualTo("propertyValue");
+                                    assertThat(property.getPropertyType()).isEqualTo(PropertyType.STRING);
+                                });
 
                                 assertThat(qm.getAllVulnerabilities(clonedComponent)).containsOnly(vuln);
 

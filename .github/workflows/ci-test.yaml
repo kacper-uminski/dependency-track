@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v4.2.2
 
       - name: Set up JDK
-        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # tag=v4.7.0
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # tag=v4.7.1
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -66,7 +66,7 @@ jobs:
 
       - name: Upload PR test coverage report
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # tag=v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag=v4.6.2
         with:
           name: pr-test-coverage-report
           path: |-

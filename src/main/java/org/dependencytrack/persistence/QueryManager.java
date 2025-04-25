@@ -56,6 +56,7 @@ import org.dependencytrack.model.License;
 import org.dependencytrack.model.LicenseGroup;
 import org.dependencytrack.model.NotificationPublisher;
 import org.dependencytrack.model.NotificationRule;
+import org.dependencytrack.model.NotificationTriggerType;
 import org.dependencytrack.model.Policy;
 import org.dependencytrack.model.PolicyCondition;
 import org.dependencytrack.model.PolicyViolation;
@@ -452,11 +453,11 @@ public class QueryManager extends AlpineQueryManager {
         return getTagQueryManager().createTag(name);
     }
 
-    public List<Tag> createTags(final List<String> names) {
+    public Set<Tag> createTags(final Collection<String> names) {
         return getTagQueryManager().createTags(names);
     }
 
-    public List<Tag> resolveTags(final List<Tag> tags) {
+    public Set<Tag> resolveTags(final Collection<Tag> tags) {
         return getTagQueryManager().resolveTags(tags);
     }
 
@@ -468,7 +469,7 @@ public class QueryManager extends AlpineQueryManager {
         return getProjectQueryManager().createProject(name, description, version, tags, parent, purl, active, isLatest, commitIndex);
     }
 
-    public Project createProject(final Project project, List<Tag> tags, boolean commitIndex) {
+    public Project createProject(final Project project, Collection<Tag> tags, boolean commitIndex) {
         return getProjectQueryManager().createProject(project, tags, commitIndex);
     }
 
@@ -1226,12 +1227,44 @@ public class QueryManager extends AlpineQueryManager {
         return getNotificationQueryManager().createNotificationRule(name, scope, level, publisher);
     }
 
+    public NotificationRule createScheduledNotificationRule(
+            final String name,
+            final NotificationScope scope,
+            final NotificationLevel level,
+            final NotificationPublisher publisher) {
+        return getNotificationQueryManager().createScheduledNotificationRule(name, scope, level, publisher);
+    }
+
     public NotificationRule updateNotificationRule(NotificationRule transientRule) {
         return getNotificationQueryManager().updateNotificationRule(transientRule);
     }
 
-    public PaginatedResult getNotificationRules() {
-        return getNotificationQueryManager().getNotificationRules();
+    public PaginatedResult getNotificationRules(final NotificationTriggerType triggerTypeFilter) {
+        return getNotificationQueryManager().getNotificationRules(triggerTypeFilter);
+    }
+
+    public List<NotificationRule> getDueScheduledNotificationRules() {
+        return getNotificationQueryManager().getDueScheduledNotificationRules();
+    }
+
+    public List<Project> getProjectsForNotificationById(final Collection<Long> ids) {
+        return getNotificationQueryManager().getProjectsForNotificationById(ids);
+    }
+
+    public List<Component> getComponentsForNotificationById(final Collection<Long> ids) {
+        return getNotificationQueryManager().getComponentsForNotificationById(ids);
+    }
+
+    public List<PolicyCondition> getPolicyConditionsForNotificationById(final Collection<Long> ids) {
+        return getNotificationQueryManager().getPolicyConditionsForNotificationById(ids);
+    }
+
+    public List<Vulnerability> getVulnerabilitiesForNotificationById(final Collection<Long> ids) {
+        return getNotificationQueryManager().getVulnerabilitiesForNotificationById(ids);
+    }
+
+    public Set<String> getTeamMemberEmailsForNotificationRule(final long ruleId) {
+        return getNotificationQueryManager().getTeamMemberEmailsForNotificationRule(ruleId);
     }
 
     public List<NotificationPublisher> getAllNotificationPublishers() {
@@ -1315,7 +1348,7 @@ public class QueryManager extends AlpineQueryManager {
         return getProjectQueryManager().bind(project, tags, keepExisting);
     }
 
-    public void bind(Project project, List<Tag> tags) {
+    public void bind(Project project, Collection<Tag> tags) {
         getProjectQueryManager().bind(project, tags);
     }
 
