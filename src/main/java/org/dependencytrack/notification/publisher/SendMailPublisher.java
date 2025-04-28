@@ -19,7 +19,6 @@
 package org.dependencytrack.notification.publisher;
 
 import alpine.common.logging.Logger;
-import alpine.model.Team;
 import alpine.notification.Notification;
 import alpine.server.mail.SendMail;
 import alpine.server.mail.SendMailException;
@@ -72,7 +71,7 @@ public class SendMailPublisher implements Publisher {
         sendNotification(ctx, notification, config, destinations);
     }
 
-    public void inform(final PublishContext ctx, final Notification notification, final JsonObject config, List<Team> teams, List<Severity> notifySeverities) {
+    public void inform(final PublishContext ctx, final Notification notification, final JsonObject config, List<Severity> notifySeverities) {
         if (config == null) {
             LOGGER.warn("No configuration found. Skipping notification. (%s)".formatted(ctx));
             return;

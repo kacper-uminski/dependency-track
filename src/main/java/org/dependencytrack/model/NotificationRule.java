@@ -39,7 +39,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import org.dependencytrack.notification.publisher.SendMailPublisher;
 
 import javax.jdo.annotations.Column;
 import javax.jdo.annotations.Element;
@@ -333,9 +332,6 @@ public class NotificationRule implements Serializable {
     }
 
     public List<Severity> getNotifySeverities(){
-        Logger LOGGER = Logger.getLogger(NotificationRule.class);
-        LOGGER.debug("S");
-
         List<Severity> result = new ArrayList<>();
         if (notifySeverities != null) {
             String[] severities = notifySeverities.split(",");
@@ -343,7 +339,7 @@ public class NotificationRule implements Serializable {
                 result.add(Severity.valueOf(s.trim()));
             }
         } else {
-            Collections.addAll(result, Severity.values());
+            return List.of(Severity.values());
         }
         return result;
     }
