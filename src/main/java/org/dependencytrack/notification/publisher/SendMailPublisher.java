@@ -19,6 +19,7 @@
 package org.dependencytrack.notification.publisher;
 
 import alpine.common.logging.Logger;
+import alpine.model.Team;
 import alpine.notification.Notification;
 import alpine.server.mail.SendMail;
 import alpine.server.mail.SendMailException;
@@ -26,6 +27,8 @@ import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.extension.core.DisallowExtensionCustomizerBuilder;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 import org.apache.commons.text.StringEscapeUtils;
+import org.dependencytrack.model.Severity;
+import org.dependencytrack.notification.vo.NewVulnerabilityIdentified;
 import org.dependencytrack.persistence.QueryManager;
 import org.dependencytrack.util.DebugDataEncryption;
 
@@ -65,6 +68,22 @@ public class SendMailPublisher implements Publisher {
             LOGGER.warn("No configuration found; Skipping notification (%s)".formatted(ctx));
             return;
         }
+        final String[] destinations = getDestinations(config, ctx.ruleId());
+        sendNotification(ctx, notification, config, destinations);
+    }
+
+    public void inform(final PublishContext ctx, final Notification notification, final JsonObject config, List<Team> teams, List<Severity> notifySeverities) {
+        if (config == null) {
+            LOGGER.warn("No configuration found. Skipping notification. (%s)".formatted(ctx));
+            return;
+        }
+
+        if (notification.getSubject() instanceof final NewVulnerabilityIdentified subject) {
+            if(!notifySeverities.contains(subject.getVulnerability().getSeverity())) {
+                return;
+            }
+        }
+
         final String[] destinations = getDestinations(config, ctx.ruleId());
         sendNotification(ctx, notification, config, destinations);
     }

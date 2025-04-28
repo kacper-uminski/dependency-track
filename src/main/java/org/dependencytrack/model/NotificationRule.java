@@ -18,6 +18,7 @@
  */
 package org.dependencytrack.model;
 
+import alpine.common.logging.Logger;
 import alpine.common.validation.RegexSequence;
 import alpine.model.Team;
 import alpine.notification.NotificationLevel;
@@ -38,6 +39,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.dependencytrack.notification.publisher.SendMailPublisher;
+
 import javax.jdo.annotations.Column;
 import javax.jdo.annotations.Element;
 import javax.jdo.annotations.Extension;
@@ -137,6 +140,10 @@ public class NotificationRule implements Serializable {
     @Persistent
     @Column(name = "NOTIFY_ON", length = 1024)
     private String notifyOn;
+
+    @Persistent
+    @Column(name = "NOTIFY_SEVERITIES", length = 1024)
+    private String notifySeverities;
 
     @Persistent
     @Column(name = "MESSAGE", length = 1024)
@@ -323,6 +330,37 @@ public class NotificationRule implements Serializable {
             }
         }
         this.notifyOn = sb.toString();
+    }
+
+    public List<Severity> getNotifySeverities(){
+        Logger LOGGER = Logger.getLogger(NotificationRule.class);
+        LOGGER.debug("S");
+
+        List<Severity> result = new ArrayList<>();
+        if (notifySeverities != null) {
+            String[] severities = notifySeverities.split(",");
+            for (String s: severities) {
+                result.add(Severity.valueOf(s.trim()));
+            }
+        } else {
+            Collections.addAll(result, Severity.values());
+        }
+        return result;
+    }
+
+    public void setNotifySeverities(List<Severity> notifySeverities){
+        if (notifySeverities.isEmpty()){
+            this.notifySeverities = null;
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i<notifySeverities.size(); i++) {
+            sb.append(notifySeverities.get(i));
+            if (i+1 < notifySeverities.size()) {
+                sb.append(",");
+            }
+        }
+        this.notifySeverities = sb.toString();
     }
 
     public NotificationPublisher getPublisher() {
