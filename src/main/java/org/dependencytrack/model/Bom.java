@@ -93,11 +93,6 @@ public class Bom implements Serializable {
     @Column(name = "SERIAL_NUMBER")
     private String serialNumber;
 
-    @Persistent
-    @Column(name = "BOM_TIMESTAMP")
-    @Schema(type = "string", format = "date-time", description = "Timestamp when the BOM was generated")
-    private Date bomTimestamp;
-
     @Persistent(defaultFetchGroup = "true")
     @Column(name = "PROJECT_ID", allowsNull = "false")
     @NotNull
@@ -155,14 +150,6 @@ public class Bom implements Serializable {
 
     public void setSerialNumber(String serialNumber) {
         this.serialNumber = serialNumber;
-    }
-
-    public Date getBomTimestamp() {
-        return bomTimestamp;
-    }
-
-    public void setBomTimestamp(Date bomTimestamp) {
-        this.bomTimestamp = bomTimestamp;
     }
 
     public Project getProject() {
