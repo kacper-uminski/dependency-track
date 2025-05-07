@@ -48,8 +48,10 @@ import org.dependencytrack.model.Finding;
 import org.dependencytrack.model.Project;
 import org.dependencytrack.model.Vulnerability;
 import org.dependencytrack.model.VulnerabilityAnalysisLevel;
+import org.dependencytrack.model.VulnerableSoftware;
 import org.dependencytrack.model.validation.ValidUuid;
 import org.dependencytrack.persistence.QueryManager;
+import org.dependencytrack.resources.v1.vo.AffectedComponent;
 import org.dependencytrack.resources.v1.vo.BomUploadResponse;
 
 import jakarta.ws.rs.GET;
@@ -65,12 +67,16 @@ import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 /**
  * JAX-RS resources for processing findings.
@@ -399,5 +405,129 @@ public class FindingResource extends AlpineResource {
         }
         return finding.getVulnerability();
     }
+
+    @GET
+    @Path("/components")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Lists all vulnerable components with extra info",
+            description = "Returns components that are vulnerable, including version, CPE/PURL, CVEs, and project list"
+    )
+    @ApiResponse(responseCode = "200", description = "Successful list of vulnerable components")
+    @PermissionRequired(Permissions.Constants.VIEW_PORTFOLIO)
+    public Response getAllVulnerableComponents(@QueryParam("includeSuppressed") boolean includeSuppressed) {
+        try (QueryManager qm = new QueryManager(getAlpineRequest())) {
+
+            // Fetch all projects from the database
+            List<Project> allProjects = new ArrayList<>(qm.getProjects(true, false, false, null).getObjects());
+
+            // Map to merge all components across projects
+            Map<String, Map<String, Object>> mergedComponentMap = new HashMap<>();
+
+            // Iterate through each project
+            for (Project project : allProjects) {
+                String projectName = project.getName();
+                String version = project.getVersion() != null ? " v" + project.getVersion() : "";
+
+                // Load all components for the current project
+                List<Component> components = qm.getAllComponents(project);
+                Map<String, Component> componentLookup = new HashMap<>();
+                for (Component c : components) {
+                    if (c.getName() != null && c.getVersion() != null) {
+                        componentLookup.put(c.getName() + "::" + c.getVersion(), c);
+                    }
+                }
+
+                // Load all findings for the current project
+                List<Finding> findings = qm.getFindings(project);
+
+                // Set to track unique findings per CVE-component
+                Set<String> uniqueFindings = new HashSet<>();
+                for (Finding finding : findings) {
+                    Map<String, Object> rawComponent = (Map<String, Object>) finding.getComponent();
+                    if (!isComponentDataValid(rawComponent)) continue;
+
+                    String name = (String) rawComponent.get("name");
+                    String compVersion = (String) rawComponent.get("version");
+                    String key = name + "::" + compVersion;
+                    if (!componentLookup.containsKey(key)) continue;
+
+                    String cve = finding.getVulnerability() != null ? (String) finding.getVulnerability().get("vulnId") : null;
+                    if (cve == null) continue;
+
+                    String dupKey = cve + "::" + key;
+                    if (!uniqueFindings.add(dupKey)) continue;
+
+                    // Create the component data
+                    if (!mergedComponentMap.containsKey(key)) {
+                        Component matched = componentLookup.get(key);
+                        Map<String, Object> data = createComponentData(matched);
+                        mergedComponentMap.put(key, data);
+                    }
+                    // Update vulnerability info for the component
+                    Map<String, Object> data = mergedComponentMap.get(key);
+                    data.put("vulnerabilityCount", (int) data.get("vulnerabilityCount") + 1);
+                    ((Set<String>) data.get("cves")).add(cve);
+                    ((Set<String>) data.get("projects")).add(projectName + version);
+                }
+            }
+
+            // Prepare final response list
+            List<Map<String, Object>> responseList = new ArrayList<>();
+            for (Map<String, Object> data : mergedComponentMap.values()) {
+                Map<String, Object> entry = new HashMap<>();
+                entry.put("component", data.get("component"));
+                entry.put("name", data.get("name"));
+                entry.put("version", data.get("version"));
+                entry.put("purl", data.get("purl"));
+                entry.put("cpe", data.get("cpe"));
+                entry.put("group", data.get("group"));
+                entry.put("swidTagId", data.get("swidTagId"));
+                entry.put("vulnerabilityCount", data.get("vulnerabilityCount"));
+                entry.put("cves", new ArrayList<>((Set<String>) data.get("cves")));
+                List<String> sortedProjects = new ArrayList<>((Set<String>) data.get("projects"));
+                Collections.sort(sortedProjects);
+                entry.put("projects", sortedProjects);
+                responseList.add(entry);
+            }
+
+            // extract the "name" field from each map, make it lowercase, and sort the list based on that.
+            responseList.sort(Comparator.comparing(entry -> ((String) entry.get("name")).toLowerCase()));
+
+            return Response.ok(responseList).build();
+        }
+    }
+
+    // === Helper method to create a new component data map ===
+    private Map<String, Object> createComponentData(Component matched) {
+        VulnerableSoftware vs = new VulnerableSoftware();
+        vs.setProduct(matched.getName());
+        vs.setVersion(matched.getVersion());
+        vs.setPurl(matched.getPurl() != null ? matched.getPurl().toString() : null);
+        vs.setCpe23(matched.getCpe());
+
+        AffectedComponent affected = new AffectedComponent(vs);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("component", affected);
+        data.put("name", matched.getName());
+        data.put("version", matched.getVersion());
+        data.put("purl", vs.getPurl());
+        data.put("cpe", matched.getCpe());
+        data.put("group", matched.getGroup() != null ? matched.getGroup() : "");
+        data.put("swidTagId", matched.getSwidTagId());
+        data.put("vulnerabilityCount", 0);
+        data.put("cves", new HashSet<String>());
+        data.put("projects", new HashSet<String>());
+        return data;
+    }
+
+    // === Helper method to validate raw component data ===
+    private boolean isComponentDataValid(Map<String, Object> rawComponent) {
+        return rawComponent != null
+                && rawComponent.get("name") != null
+                && rawComponent.get("version") != null;
+    }
+
 
 }
