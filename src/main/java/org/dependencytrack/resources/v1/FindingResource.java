@@ -427,7 +427,8 @@ public class FindingResource extends AlpineResource {
             // Iterate through each project
             for (Project project : allProjects) {
                 String projectName = project.getName();
-                String version = project.getVersion() != null ? " v" + project.getVersion() : "";
+                String projectVersion = project.getVersion() != null ? " v" + project.getVersion() : "";
+                String projectUuid = project.getUuid().toString();
 
                 // Load all components for the current project
                 List<Component> components = qm.getAllComponents(project);
@@ -468,7 +469,11 @@ public class FindingResource extends AlpineResource {
                     Map<String, Object> data = mergedComponentMap.get(key);
                     data.put("vulnerabilityCount", (int) data.get("vulnerabilityCount") + 1);
                     ((Set<String>) data.get("cves")).add(cve);
-                    ((Set<String>) data.get("projects")).add(projectName + version);
+                    Map<String, String> projectInfo = new HashMap<>();
+                    projectInfo.put("name", projectName);
+                    projectInfo.put("version", projectVersion);
+                    projectInfo.put("uuid", projectUuid);
+                    ((Set<Map<String, String>>) data.get("projects")).add(projectInfo);
                 }
             }
 
@@ -485,8 +490,8 @@ public class FindingResource extends AlpineResource {
                 entry.put("swidTagId", data.get("swidTagId"));
                 entry.put("vulnerabilityCount", data.get("vulnerabilityCount"));
                 entry.put("cves", new ArrayList<>((Set<String>) data.get("cves")));
-                List<String> sortedProjects = new ArrayList<>((Set<String>) data.get("projects"));
-                Collections.sort(sortedProjects);
+                List<Map<String, String>> sortedProjects = new ArrayList<>((Set<Map<String, String>>) data.get("projects"));
+                sortedProjects.sort(Comparator.comparing(p -> p.get("name").toLowerCase()));
                 entry.put("projects", sortedProjects);
                 responseList.add(entry);
             }
