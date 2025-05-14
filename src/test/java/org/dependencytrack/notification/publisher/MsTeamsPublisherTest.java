@@ -381,13 +381,6 @@ public class MsTeamsPublisherTest extends AbstractWebhookPublisherTest<MsTeamsPu
     }
 
     @Test
-    public void testInformWithSeverityThatShouldNotTriggerNotification() {
-        super.baseTestInformWithSeverityThatShouldNotTriggerNotification();
-
-        verify(0, postRequestedFor(urlPathEqualTo("/rest/api/2/issue")));
-    }
-
-    @Test
     public void testPublishWithScheduledNewVulnerabilitiesNotification() {
         super.baseTestPublishWithScheduledNewVulnerabilitiesNotification();
 

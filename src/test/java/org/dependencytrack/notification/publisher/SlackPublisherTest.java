@@ -19,7 +19,12 @@
 package org.dependencytrack.notification.publisher;
 
 import alpine.model.ConfigProperty;
+import alpine.notification.Notification;
+import org.dependencytrack.model.Severity;
+import org.dependencytrack.notification.NotificationRouter;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.dependencytrack.model.ConfigPropertyConstants.GENERAL_BASE_URL;
@@ -844,15 +849,21 @@ class SlackPublisherTest extends AbstractWebhookPublisherTest<SlackPublisher> {
     }
 
     @Test
-    public void testInformWithSeverityThatShouldNotTriggerNotification() {
-        super.baseTestInformWithSeverityThatShouldNotTriggerNotification();
+    public void testNotificationThatShouldNotTriggerNotification() {
+        Notification notification = createNotificationWithNotifySeverities(List.of(Severity.LOW));
+
+        NotificationRouter router = new NotificationRouter();
+        router.inform(notification);
 
         verify(0, postRequestedFor(urlPathEqualTo("/rest/api/2/issue")));
     }
 
     @Test
-    public void testInformWithSeverityThatShouldTriggerNotification() {
-        super.baseTestInformWithSeverityThatShouldTriggerNotification();
+    public void testNotificationThatShouldTriggerNotification() {
+        Notification notification = createNotificationWithNotifySeverities(List.of(Severity.MEDIUM));
+
+        NotificationRouter router = new NotificationRouter();
+        router.inform(notification);
 
         verify(postRequestedFor(anyUrl())
                 .withHeader("Content-Type", equalTo("application/json"))
