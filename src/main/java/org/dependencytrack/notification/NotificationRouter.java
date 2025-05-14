@@ -26,6 +26,7 @@ import org.dependencytrack.exception.PublisherException;
 import org.dependencytrack.model.NotificationPublisher;
 import org.dependencytrack.model.NotificationRule;
 import org.dependencytrack.model.Project;
+import org.dependencytrack.model.Severity;
 import org.dependencytrack.model.Tag;
 import org.dependencytrack.notification.publisher.PublishContext;
 import org.dependencytrack.notification.publisher.Publisher;
@@ -90,7 +91,7 @@ public class NotificationRouter implements Subscriber {
                             .add(CONFIG_TEMPLATE_KEY, notificationPublisher.getTemplate())
                             .addAll(Json.createObjectBuilder(config))
                             .build();
-                    publisher.inform(ruleCtx, restrictNotificationToRuleProjects(notification, rule), notificationPublisherConfig, rule.getNotifySeverities());
+                    publisher.inform(ruleCtx, restrictNotificationToRuleProjects(notification, rule), notificationPublisherConfig);
                 } else {
                     LOGGER.error("The defined notification publisher is not assignable from " + Publisher.class.getCanonicalName() + " (%s)".formatted(ruleCtx));
                 }
@@ -217,6 +218,18 @@ public class NotificationRouter implements Subscriber {
             final List<NotificationRule> result = query.executeList();
             pm.detachCopyAll(result);
             LOGGER.debug("Matched %d notification rules (%s)".formatted(result.size(), ctx));
+
+            // Filter out unwanted severities from NewVulnerabilityIdentified
+            for (final NotificationRule rule : result) {
+                if (notification.getSubject() instanceof NewVulnerabilityIdentified vuln) {
+                    final Severity sev = vuln.getVulnerability().getSeverity();
+                    if (sev != null && rule.getNotifySeverities().contains(sev)) {
+                        System.out.printf("Existing rule matches severity %s%n", sev);
+                        rules.add(rule);
+                        return rules;
+                    }
+                }
+            }
 
             if (NotificationScope.PORTFOLIO.name().equals(notification.getScope())
                     && notification.getSubject() instanceof final NewVulnerabilityIdentified subject) {

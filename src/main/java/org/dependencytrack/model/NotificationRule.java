@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.TreeSet;
 import java.util.UUID;
 
@@ -343,18 +344,11 @@ public class NotificationRule implements Serializable {
     }
 
     public void setNotifySeverities(List<Severity> notifySeverities){
-        if (notifySeverities.isEmpty()){
+        if (notifySeverities == null || notifySeverities.isEmpty()){
             this.notifySeverities = null;
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        for (int i=0; i<notifySeverities.size(); i++) {
-            sb.append(notifySeverities.get(i));
-            if (i+1 < notifySeverities.size()) {
-                sb.append(",");
-            }
-        }
-        this.notifySeverities = sb.toString();
+        this.notifySeverities = notifySeverities.stream().map(Enum::name).collect(Collectors.joining(","));
     }
 
     public NotificationPublisher getPublisher() {
