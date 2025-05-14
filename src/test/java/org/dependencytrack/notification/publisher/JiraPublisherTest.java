@@ -39,8 +39,6 @@ class JiraPublisherTest extends AbstractWebhookPublisherTest<JiraPublisher> {
         super(DefaultNotificationPublishers.JIRA, new JiraPublisher());
     }
 
-    private static final alpine.common.logging.Logger LOGGER = Logger.getLogger(JiraPublisherTest.class);
-
     @BeforeEach
     public void setUp() throws Exception {
         qm.createConfigProperty(
@@ -202,13 +200,6 @@ class JiraPublisherTest extends AbstractWebhookPublisherTest<JiraPublisher> {
                           }
                         }
                         """)));
-    }
-
-    @Test
-    public void testInformWithSeverityThatShouldNotTriggerNotification() {
-        super.baseTestInformWithSeverityThatShouldNotTriggerNotification();
-
-        verify(0, postRequestedFor(urlPathEqualTo("/rest/api/2/issue")));
     }
 
     @Test

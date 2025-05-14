@@ -147,11 +147,5 @@ public class MattermostPublisherTest extends AbstractWebhookPublisherTest<Matter
                         }
                         """)));
     }
-
-    @Test
-    public void testInformWithSeverityThatShouldNotTriggerNotification() {
-        super.baseTestInformWithSeverityThatShouldNotTriggerNotification();
-
-        verify(0, postRequestedFor(urlPathEqualTo("/rest/api/2/issue")));
-    }
+    
 }

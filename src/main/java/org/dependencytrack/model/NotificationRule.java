@@ -49,6 +49,7 @@ import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 import javax.jdo.annotations.Unique;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -330,17 +331,14 @@ public class NotificationRule implements Serializable {
         this.notifyOn = sb.toString();
     }
 
-    public List<Severity> getNotifySeverities(){
-        List<Severity> result = new ArrayList<>();
-        if (notifySeverities != null) {
-            String[] severities = notifySeverities.split(",");
-            for (String s: severities) {
-                result.add(Severity.valueOf(s.trim()));
-            }
-        } else {
-            return List.of(Severity.values());
+    public List<Severity> getNotifySeverities() {
+        if (notifySeverities == null) {
+            return List.of();           // empty (user did not pick anything)
         }
-        return result;
+        return Arrays.stream(notifySeverities.split(","))
+                .map(String::trim)
+                .map(Severity::valueOf)
+                .collect(Collectors.toList());
     }
 
     public void setNotifySeverities(List<Severity> notifySeverities){
