@@ -20,11 +20,7 @@ package org.dependencytrack.notification.publisher;
 
 import org.junit.jupiter.api.Test;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class MattermostPublisherTest extends AbstractWebhookPublisherTest<MattermostPublisher> {
 
@@ -151,5 +147,5 @@ public class MattermostPublisherTest extends AbstractWebhookPublisherTest<Matter
                         }
                         """)));
     }
-
+    
 }

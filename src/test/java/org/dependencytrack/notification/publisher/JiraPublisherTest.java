@@ -18,6 +18,7 @@
  */
 package org.dependencytrack.notification.publisher;
 
+import alpine.common.logging.Logger;
 import alpine.model.ConfigProperty;
 import alpine.security.crypto.DataEncryption;
 import jakarta.json.JsonObjectBuilder;
